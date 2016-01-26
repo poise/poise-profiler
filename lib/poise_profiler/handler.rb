@@ -15,6 +15,7 @@
 #
 
 require 'chef/event_dispatch/base'
+require 'chef/json_compat'
 
 
 module PoiseProfiler
@@ -29,14 +30,21 @@ module PoiseProfiler
 
     def run_completed(_node)
       set_log_level(:info) do
+        puts('Poise Profiler:')
         puts_timer(:resources, 'Resource')
         puts_timer(:test_resources, 'Test Resource') unless timers[:test_resources].empty?
         puts_timer(:classes, 'Class')
+        puts("Profiler JSON: #{Chef::JSONCompat.to_json(timers)}")
+        puts('')
       end
     end
 
     def run_failed(_run_error)
       run_completed(nil)
+    end
+
+    def reset!
+      timers.clear
     end
 
     private

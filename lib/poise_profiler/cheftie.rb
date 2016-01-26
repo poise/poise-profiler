@@ -20,8 +20,10 @@ require 'poise_profiler/handler'
 
 # Install the handler.
 if Chef.run_context && Chef.run_context.events
+  # :nocov:
   Chef::Log.debug('Registering poise-profiler using events api')
   Chef.run_context.events.register(PoiseProfiler::Handler.instance)
+  # :nocov:
 else
   Chef::Log.debug('Registering poise-profiler using global config')
   Chef::Config[:event_handlers] << PoiseProfiler::Handler.instance

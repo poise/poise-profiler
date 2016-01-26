@@ -14,9 +14,15 @@
 # limitations under the License.
 #
 
+require 'chef/chef_class'
 require 'chef/config'
 require 'poise_profiler/handler'
 
 # Install the handler.
-Chef::Config.exception_handlers << PoiseProfiler::Handler.instance
-Chef::Config.report_handlers << PoiseProfiler::Handler.instance
+if Chef.run_context && Chef.run_context.events
+  Chef::Log.debug('Registering poise-profiler using events api')
+  Chef.run_context.events.register(PoiseProfiler::Handler.instance)
+else
+  Chef::Log.debug('Registering poise-profiler using global config')
+  Chef::Config[:event_handlers] << PoiseProfiler::Handler.instance
+end

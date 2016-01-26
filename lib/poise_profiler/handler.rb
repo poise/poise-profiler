@@ -14,51 +14,45 @@
 # limitations under the License.
 #
 
-require 'chef/handler'
+require 'chef/event_dispatch/base'
 
 
 module PoiseProfiler
-  class Handler < Chef::Handler
+  class Handler < Chef::EventDispatch::Base
     include Singleton
 
-    def report
-      cookbooks = Hash.new(0)
-      recipes = Hash.new(0)
-      resources = Hash.new(0)
+    def resource_completed(resource)
+      key = resource.resource_name.to_s.end_with?('_test') ? :test_resources : :resources
+      timers[key]["#{resource.resource_name}[#{resource.name}]"] += resource.elapsed_time
+      timers[:classes][resource.class.name] += resource.elapsed_time
+    end
 
-      # collect all profiled timings and group by type
-      all_resources.each do |r|
-        cookbooks[r.cookbook_name] += r.elapsed_time
-        recipes["#{r.cookbook_name}::#{r.recipe_name}"] += r.elapsed_time
-        resources["#{r.resource_name}[#{r.name}]"] = r.elapsed_time
-      end
-
+    def run_completed(_node)
       set_log_level(:info) do
-        # print each timing by group, sorting with highest elapsed time first
-        puts "Elapsed_time  Cookbook"
-        puts "------------  -------------"
-        cookbooks.sort_by{ |k,v| -v }.each do |cookbook, run_time|
-          puts "%12f  %s" % [run_time, cookbook]
-        end
-        puts ""
-
-        puts "Elapsed_time  Recipe"
-        puts "------------  -------------"
-        recipes.sort_by{ |k,v| -v }.each do |recipe, run_time|
-          puts "%12f  %s" % [run_time, recipe]
-        end
-        puts ""
-
-        puts "Elapsed_time  Resource"
-        puts "------------  -------------"
-        resources.sort_by{ |k,v| -v }.each do |resource, run_time|
-          puts "%12f  %s" % [run_time, resource]
-        end
-        puts ""
+        puts_timer(:resources, 'Resource')
+        puts_timer(:test_resources, 'Test Resource') unless timers[:test_resources].empty?
+        puts_timer(:classes, 'Class')
       end
     end
 
+    def run_failed(_run_error)
+      run_completed(nil)
+    end
+
     private
+
+    def timers
+      @timers ||= Hash.new {|hash, key| hash[key] = Hash.new(0) }
+    end
+
+    def puts_timer(key, label)
+      puts "Time          #{label}"
+      puts "------------  -------------"
+      timers[key].sort_by{ |k,v| -v }.each do |val, run_time|
+        puts "%12f  %s" % [run_time, val]
+      end
+      puts ""
+    end
 
     def puts(*args)
       Chef::Log.info(*args)

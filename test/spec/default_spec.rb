@@ -26,13 +26,9 @@ describe 'cheftie' do
     begin
       run_chef
     rescue Exception => ex
-      if client.run_status
-        client.run_status.stop_clock
-        client.run_status.exception = ex
-      end
-      client.run_failed
+      client.events.run_failed(ex)
     else
-      client.run_completed_successfully
+      client.events.run_completed(chef_run.node)
     end
   end
   recipe(subject: false) do

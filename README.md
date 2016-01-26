@@ -37,6 +37,8 @@ dependency in your `metadata.rb`.
 
 ## Sponsors
 
+Development sponsored by [Bloomberg](http://www.bloomberg.com/company/technology/).
+
 The Poise test server infrastructure is sponsored by [Rackspace](https://rackspace.com/).
 
 ## License

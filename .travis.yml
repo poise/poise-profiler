@@ -1,0 +1,11 @@
+sudo: false
+cache: bundler
+language: ruby
+rvm:
+- '2.2'
+bundler_args: "--binstubs=$PWD/bin --jobs 3 --retry 3"
+script:
+- "./bin/rake travis"
+gemfile:
+- test/gemfiles/chef-12.gemfile
+- test/gemfiles/master.gemfile

@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 
+require 'chef/chef_class'
 require 'chef/event_dispatch/base'
 require 'chef/json_compat'
 
@@ -29,14 +30,13 @@ module PoiseProfiler
     end
 
     def run_completed(_node)
-      set_log_level(:info) do
-        puts('Poise Profiler:')
-        puts_timer(:resources, 'Resource')
-        puts_timer(:test_resources, 'Test Resource') unless timers[:test_resources].empty?
-        puts_timer(:classes, 'Class')
-        puts("Profiler JSON: #{Chef::JSONCompat.to_json(timers)}")
-        puts('')
-      end
+      Chef::Log.debug('Processing poise-profiler data')
+      puts('Poise Profiler:')
+      puts_timer(:resources, 'Resource')
+      puts_timer(:test_resources, 'Test Resource') unless timers[:test_resources].empty?
+      puts_timer(:classes, 'Class')
+      puts("Profiler JSON: #{Chef::JSONCompat.to_json(timers)}")
+      puts('')
     end
 
     def run_failed(_run_error)
@@ -45,6 +45,7 @@ module PoiseProfiler
 
     def reset!
       timers.clear
+      @events = nil
     end
 
     private
@@ -62,16 +63,12 @@ module PoiseProfiler
       puts ""
     end
 
-    def puts(*args)
-      Chef::Log.info(*args)
+    def puts(line)
+      events.stream_output(:profiler, line+"\n")
     end
 
-    def set_log_level(level, &block)
-      old_level = Chef::Log.level
-      Chef::Log.level = level
-      block.call
-    ensure
-      Chef::Log.level = old_level
+    def events
+      @events ||= Chef.run_context.events
     end
 
   end

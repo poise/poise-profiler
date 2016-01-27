@@ -14,20 +14,20 @@ Based on [chef-handler-profiler](https://github.com/joemiller/chef-handler-profi
 by Joe Miller.
 
 ```
-INFO: Poise Profiler:
-INFO: Time          Resource
-INFO: ------------  -------------
-INFO:     1.018142  execute[sleep 1]
-INFO:     1.001729  ruby_block[test]
-INFO:     0.006395  file[/test]
-INFO:
-INFO: Time          Class
-INFO: ------------  -------------
-INFO:     1.018142  Chef::Resource::Execute
-INFO:     1.001729  Chef::Resource::RubyBlock
-INFO:     0.006395  Chef::Resource::File
-INFO:
-INFO: Profiler JSON: {"resources":{"ruby_block[test]":1.001729177,"file[/test]":0.006395018,"execute[sleep 1]":1.018141868},"classes":{"Chef::Resource::RubyBlock":1.001729177,"Chef::Resource::File":0.006395018,"Chef::Resource::Execute":1.018141868},"test_resources":{}}
+Poise Profiler:
+Time          Resource
+------------  -------------
+    1.018142  execute[sleep 1]
+    1.001729  ruby_block[test]
+    0.006395  file[/test]
+
+Time          Class
+------------  -------------
+    1.018142  Chef::Resource::Execute
+    1.001729  Chef::Resource::RubyBlock
+    0.006395  Chef::Resource::File
+
+Profiler JSON: {"resources":{"ruby_block[test]":1.001729177,"file[/test]":0.006395018,"execute[sleep 1]":1.018141868},"classes":{"Chef::Resource::RubyBlock":1.001729177,"Chef::Resource::File":0.006395018,"Chef::Resource::Execute":1.018141868},"test_resources":{}}
 ```
 
 ## Quick Start

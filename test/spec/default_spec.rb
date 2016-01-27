@@ -32,11 +32,11 @@ describe 'cheftie' do
       events.run_completed(chef_run.node)
     end
   end
-  subject { wrapped_chef_run; output.drop_while {|line| line != 'Poise Profiler:'}.drop(1).map {|line| "#{line}\n" }.join('') }
+  subject { wrapped_chef_run; output.join('') }
   before do
     # Divert log output for analysis.
     _output = output
-    allow(Chef::Log).to receive(:info) {|line| _output << line }
+    allow(events).to receive(:stream_output) {|tag, line| _output << line }
     # Clear the handler's internal state.
     PoiseProfiler::Handler.instance.reset!
   end
@@ -50,7 +50,8 @@ describe 'cheftie' do
 
     it do
       is_expected.to match(
-%r{\ATime          Resource
+%r{\APoise Profiler:
+Time          Resource
 ------------  -------------
 \s*([\d.]+)  ruby_block\[test\]
 
@@ -79,7 +80,8 @@ Profiler JSON: \{.*?\}
 
     it do
       is_expected.to match(
-%r{\ATime          Resource
+%r{\APoise Profiler:
+Time          Resource
 ------------  -------------
 \s*([\d.]+)  ruby_block\[test\]
 
@@ -104,7 +106,8 @@ Profiler JSON: \{.*?\}
 
     it do
       is_expected.to match(
-%r{\ATime          Resource
+%r{\APoise Profiler:
+Time          Resource
 ------------  -------------
 \s*([\d.]+)  ruby_block\[test2\]
 \s*([\d.]+)  ruby_block\[test\]
@@ -138,7 +141,8 @@ Profiler JSON: \{.*?\}
 
     it do
       is_expected.to match(
-%r{\ATime          Resource
+%r{\APoise Profiler:
+Time          Resource
 ------------  -------------
 \s*([\d.]+)  my_resource\[test\]
 \s*([\d.]+)  ruby_block\[test\]
@@ -174,7 +178,8 @@ Profiler JSON: \{.*?\}
 
     it do
       is_expected.to match(
-%r{\ATime          Resource
+%r{\APoise Profiler:
+Time          Resource
 ------------  -------------
 \s*([\d.]+)  ruby_block\[test\]
 

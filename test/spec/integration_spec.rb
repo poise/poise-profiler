@@ -17,11 +17,15 @@
 require 'spec_helper'
 require 'mixlib/shellout'
 
-describe 'integration' do
+# Only run these tests on Travis because otherwise slow and annoying.
+describe 'integration', if: ENV['TRAVIS_SECURE_ENV_VARS'] do
   subject do
-    Mixlib::ShellOut.new('kitchen test -d always', cwd: File.expand_path('../../..', __FILE__)).tap(&:run_command)
+    Mixlib::ShellOut.new('rake travis:integration', cwd: File.expand_path('../../..', __FILE__)).tap(&:run_command)
   end
 
-  its(:exitstatus) { is_expected.to eq 0 }
-  its(:stdout) { is_expected.to include 'Poise Profiler:' }
+  it do
+    # Don't run this extra times.
+    expect(subject.exitstatus).to eq 0
+    expect(subject.stdout).to include 'Poise Profiler:'
+  end
 end

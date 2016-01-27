@@ -17,6 +17,11 @@
 require 'spec_helper'
 require 'poise'
 
+# Monkey-patch this in for Chef pre-12.4.
+class Chef::EventDispatch::Dispatcher
+  attr_reader :subscribers
+end
+
 describe 'cheftie' do
   step_into(:ruby_block)
   let(:output) { [] }
@@ -75,7 +80,7 @@ Profiler JSON: \{.*?\}
     end
     before do
       # Suppress the normal formatter output for errors.
-      events.subscribers.reject! {|s| s.respond_to?(:is_formatter?) && s.is_formatter? }
+      events.subscribers.reject! {|s| (s.respond_to?(:is_formatter?) && s.is_formatter?) || s.is_a?(Chef::Formatters::Base) }
     end
 
     it do

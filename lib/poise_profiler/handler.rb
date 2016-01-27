@@ -14,7 +14,11 @@
 # limitations under the License.
 #
 
-require 'chef/chef_class'
+begin
+  require 'chef/chef_class'
+rescue LoadError
+  # ¯\_(ツ)_/¯ Chef < 12.3.
+end
 require 'chef/event_dispatch/base'
 require 'chef/json_compat'
 
@@ -22,6 +26,10 @@ require 'chef/json_compat'
 module PoiseProfiler
   class Handler < Chef::EventDispatch::Base
     include Singleton
+
+    # Used in {#monkey_patch_old_chef}
+    # @api private
+    attr_writer :events, :monkey_patched
 
     def resource_completed(resource)
       key = resource.resource_name.to_s.end_with?('_test') ? :test_resources : :resources
@@ -46,6 +54,22 @@ module PoiseProfiler
     def reset!
       timers.clear
       @events = nil
+    end
+
+    # Inject this instance for Chef < 12.3. Don't call this on newer Chef.
+    def monkey_patch_old_chef!
+      return if @monkey_patched
+      require 'chef/event_dispatch/dispatcher'
+      instance = self
+      orig_method = Chef::EventDispatch::Dispatcher.instance_method(:library_file_loaded)
+      Chef::EventDispatch::Dispatcher.send(:define_method, :library_file_loaded) do |filename|
+        instance.events = self
+        instance.monkey_patched = false
+        @subscribers << instance
+        Chef::EventDispatch::Dispatcher.send(:define_method, :library_file_loaded, orig_method)
+        orig_method.bind(self).call(filename)
+      end
+      @monkey_patched = true
     end
 
     private

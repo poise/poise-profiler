@@ -22,6 +22,10 @@ class Chef::EventDispatch::Dispatcher
   attr_reader :subscribers
 end
 
+# Dummy error to use below.
+class DummyError < RuntimeError
+end
+
 describe 'cheftie' do
   step_into(:ruby_block)
   let(:output) { [] }
@@ -30,9 +34,11 @@ describe 'cheftie' do
     # Force the complete/failed events to trigger because ChefSpec doesn't
     # normally run them.
     begin
+      events.library_file_loaded(nil)
       chef_run
     rescue Exception => ex
       events.run_failed(ex)
+      raise unless ex.is_a?(DummyError)
     else
       events.run_completed(chef_run.node)
     end
@@ -44,6 +50,9 @@ describe 'cheftie' do
     allow(events).to receive(:stream_output) {|tag, line| _output << line }
     # Clear the handler's internal state.
     PoiseProfiler::Handler.instance.reset!
+    if Gem::Version.create(Chef::VERSION) <= Gem::Version.create('12.2.1')
+      PoiseProfiler::Handler.instance.monkey_patch_old_chef!
+    end
   end
 
   context 'with a single resource' do
@@ -72,7 +81,7 @@ Profiler JSON: \{.*?\}
   context 'with a failed run' do
     recipe(subject: false) do
       ruby_block 'test' do
-        block { raise RuntimeError }
+        block { raise DummyError }
       end
       ruby_block 'test2' do
         block { }

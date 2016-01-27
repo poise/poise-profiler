@@ -14,12 +14,19 @@
 # limitations under the License.
 #
 
-require 'chef/chef_class'
+begin
+  require 'chef/chef_class'
+rescue LoadError
+  # ¯\_(ツ)_/¯ Chef < 12.3.
+end
 require 'chef/config'
 require 'poise_profiler/handler'
 
 # Install the handler.
-if Chef.run_context && Chef.run_context.events
+if Gem::Version.create(Chef::VERSION) <= Gem::Version.create('12.2.1')
+  Chef::Log.debug('Registering poise-profiler using monkey patch')
+  PoiseProfiler::Handler.instance.monkey_patch_old_chef!
+elsif Chef.run_context && Chef.run_context.events
   # :nocov:
   Chef::Log.debug('Registering poise-profiler using events api')
   Chef.run_context.events.register(PoiseProfiler::Handler.instance)

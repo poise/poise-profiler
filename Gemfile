@@ -29,4 +29,4 @@ end
 
 dev_gem 'halite'
 dev_gem 'poise'
-dev_gem 'poise-boiler'
+dev_gem 'poise-boiler', github: 'poise/poise-boiler'

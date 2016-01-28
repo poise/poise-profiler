@@ -2,4 +2,4 @@
 
 ## v1.0.0
 
-* Initial release!
+* Initial release! Core reporting structure is in place, more useful data later.

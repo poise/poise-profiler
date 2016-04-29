@@ -35,6 +35,12 @@ Profiler JSON: {"resources":{"ruby_block[test]":1.001729177,"file[/test]":0.0063
 Add `recipe[poise-profiler]` to your run list or add `poise-profiler` as a
 dependency in your `metadata.rb`.
 
+## JSON Output
+
+As shown above, JSON output is available for use with graphing or other trend
+analysis. To enable this either set the environment variable `$CI` or the node
+attribute `node['CI']`.
+
 ## Sponsors
 
 Development sponsored by [Bloomberg](http://www.bloomberg.com/company/technology/).

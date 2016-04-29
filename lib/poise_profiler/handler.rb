@@ -37,13 +37,13 @@ module PoiseProfiler
       timers[:classes][resource.class.name] += resource.elapsed_time
     end
 
-    def run_completed(_node)
+    def run_completed(node)
       Chef::Log.debug('Processing poise-profiler data')
       puts('Poise Profiler:')
       puts_timer(:resources, 'Resource')
       puts_timer(:test_resources, 'Test Resource') unless timers[:test_resources].empty?
       puts_timer(:classes, 'Class')
-      puts("Profiler JSON: #{Chef::JSONCompat.to_json(timers)}") if ENV['CI']
+      puts("Profiler JSON: #{Chef::JSONCompat.to_json(timers)}") if ENV['CI'] || node['CI']
       puts('')
     end
 

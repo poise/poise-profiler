@@ -43,7 +43,7 @@ module PoiseProfiler
       puts_timer(:resources, 'Resource')
       puts_timer(:test_resources, 'Test Resource') unless timers[:test_resources].empty?
       puts_timer(:classes, 'Class')
-      puts("Profiler JSON: #{Chef::JSONCompat.to_json(timers)}")
+      puts("Profiler JSON: #{Chef::JSONCompat.to_json(timers)}") if ENV['CI']
       puts('')
     end
 

@@ -54,8 +54,18 @@ describe 'cheftie' do
       PoiseProfiler::Handler.instance.monkey_patch_old_chef!
     end
   end
+  around do |ex|
+    old_env = ENV.to_h
+    begin
+      ex.run
+    ensure
+      ENV.clear
+      ENV.update(old_env)
+    end
+  end
 
   context 'with a single resource' do
+    before { ENV['CI'] = 'true' }
     recipe(subject: false) do
       ruby_block 'test' do
         block { }
@@ -79,6 +89,7 @@ Profiler JSON: \{.*?\}
   end # /context with a single resource
 
   context 'with a failed run' do
+    before { ENV['CI'] = 'true' }
     recipe(subject: false) do
       ruby_block 'test' do
         block { raise DummyError }
@@ -109,6 +120,7 @@ Profiler JSON: \{.*?\}
   end # /context with a failed run
 
   context 'with two resources' do
+    before { ENV['CI'] = 'true' }
     recipe(subject: false) do
       ruby_block 'test' do
         block { }
@@ -137,6 +149,7 @@ Profiler JSON: \{.*?\}
   end # /context with two resources
 
   context 'with inner resources' do
+    before { ENV['CI'] = 'true' }
     resource(:my_resource, unwrap_notifying_block: false)
     provider(:my_resource) do
       include Poise
@@ -174,6 +187,7 @@ Profiler JSON: \{.*?\}
   end # /context with inner resources
 
   context 'with test resources' do
+    before { ENV['CI'] = 'true' }
     resource(:poise_test, unwrap_notifying_block: false)
     provider(:poise_test) do
       include Poise
@@ -212,4 +226,27 @@ Profiler JSON: \{.*?\}
       expect($2).to eq $3
     end
   end # /context with test resources
+
+  context 'without $CI' do
+    before { ENV.delete('CI') }
+    recipe(subject: false) do
+      ruby_block 'test' do
+        block { }
+      end
+    end
+
+    it do
+      is_expected.to match(
+%r{\APoise Profiler:
+Time          Resource
+------------  -------------
+\s*([\d.]+)  ruby_block\[test\]
+
+Time          Class
+------------  -------------
+\s*([\d.]+)  Chef::Resource::RubyBlock
+
+\Z})
+    end
+  end # /context without $CI
 end

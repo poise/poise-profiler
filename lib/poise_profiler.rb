@@ -16,6 +16,7 @@
 
 
 module PoiseProfiler
+  autoload :Config, 'poise_profiler/config'
   autoload :Handler, 'poise_profiler/handler'
   autoload :VERSION, 'poise_profiler/version'
 end

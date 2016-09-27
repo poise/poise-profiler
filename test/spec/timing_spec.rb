@@ -26,7 +26,7 @@ end
 class DummyError < RuntimeError
 end
 
-describe 'cheftie' do
+describe PoiseProfiler::Timing do
   step_into(:ruby_block)
   let(:output) { [] }
   let(:events) { chef_runner.send(:client).events }
@@ -49,9 +49,9 @@ describe 'cheftie' do
     _output = output
     allow(events).to receive(:stream_output) {|tag, line| _output << line }
     # Clear the handler's internal state.
-    PoiseProfiler::Handler.instance.reset!
+    described_class.instance.reset!
     if Gem::Version.create(Chef::VERSION) <= Gem::Version.create('12.2.1')
-      PoiseProfiler::Handler.instance.monkey_patch_old_chef!
+      described_class.instance._monkey_patch_old_chef!
     end
   end
   around do |ex|

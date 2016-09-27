@@ -17,6 +17,6 @@
 
 module PoiseProfiler
   autoload :Config, 'poise_profiler/config'
-  autoload :Handler, 'poise_profiler/handler'
+  autoload :Timing, 'poise_profiler/timing'
   autoload :VERSION, 'poise_profiler/version'
 end

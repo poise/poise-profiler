@@ -27,7 +27,11 @@ module PoiseProfiler
     # @api private
     module Dispatcher
       def recipe_loaded(*args)
-        call_subscribers(:recipe_loaded, *args)
+        if defined?(call_subscribers)
+          call_subscribers(:recipe_loaded, *args)
+        else
+          @subscribers.each { |s| s.recipe_loaded(*args) }
+        end
       end
 
       # Monkeypatch us in for ?. TODO THIS

@@ -26,6 +26,6 @@ describe 'integration', if: ENV['TRAVIS_SECURE_ENV_VARS'] do
   it do
     # Don't run this extra times.
     expect(subject.exitstatus).to eq 0
-    expect(subject.stdout).to include 'Poise Profiler:'
+    expect(subject.stdout).to include 'Poise Profiler Timing:'
   end
 end

@@ -14,7 +14,7 @@ Based on [chef-handler-profiler](https://github.com/joemiller/chef-handler-profi
 by Joe Miller.
 
 ```
-Poise Profiler:
+Poise Profiler Timing:
 Time          Resource
 ------------  -------------
     1.018142  execute[sleep 1]

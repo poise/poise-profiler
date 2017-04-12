@@ -33,7 +33,7 @@ module PoiseProfiler
       end
 
       # Monkeypatch us in for ?. TODO THIS
-      if Gem::Version.create(Chef::VERSION) < Gem::Version.create('13')
+      if Gem::Version.create(Chef::VERSION) < Gem::Version.create('14')
         Chef::CookbookVersion.prepend(self)
       end
 

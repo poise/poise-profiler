@@ -16,6 +16,7 @@
 
 require 'yaml'
 
+require 'chef/mash'
 begin
   require 'chef/chef_class'
 rescue LoadError
@@ -32,19 +33,11 @@ module PoiseProfiler
   # @example
   #   cfg = Config.new
   #   puts cfg[:profile_memory]
-  class Config
+  class Config < Mash
     def initialize
-      @config = {}
+      super
       gather_from_env
       gather_from_node
-    end
-
-    # Retrieve a configuration key.
-    #
-    # @param key [Symbol] Key to retrieve.
-    # @return [Object]
-    def [](key)
-      @config[key]
     end
 
     private
@@ -56,7 +49,7 @@ module PoiseProfiler
     def gather_from_env
       ENV.each do |key, value|
         if key.downcase =~ /^poise(_|-)profiler_(.+)$/
-          @config[$2.to_sym] = YAML.safe_load(value)
+          self[$2] = YAML.safe_load(value)
         end
       end
     end
@@ -67,7 +60,7 @@ module PoiseProfiler
     def gather_from_node
       return unless defined?(Chef.node)
       (Chef.node['poise-profiler'] || {}).each do |key, value|
-        @config[key.to_sym] = value
+        self[key] = value
       end
     end
 

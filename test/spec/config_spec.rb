@@ -49,10 +49,13 @@ describe PoiseProfiler::Config do
     its([:option]) { is_expected.to eq 1 }
   end # /context with $POISE_PROFILER_OPTION=1
 
-  context 'with node attributes' do
-    let(:default_attributes) do
-      {'poise-profiler' => {'option' => 'value'}}
-    end
-    its([:option]) { is_expected.to eq 'value' }
-  end # /context with node attributes
+  # Attribute config is only supported when the global node is available.
+  if defined?(Chef.node)
+    context 'with node attributes' do
+      let(:default_attributes) do
+        {'poise-profiler' => {'option' => 'value'}}
+      end
+      its([:option]) { is_expected.to eq 'value' }
+    end # /context with node attributes
+  end
 end

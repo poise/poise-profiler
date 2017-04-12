@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-require 'poise_profiler'
-require 'poise_profiler/core_ext'
-
-# Install the handlers.
-PoiseProfiler::Timing.install!
+require 'poise_profiler/core_ext/cookbook_version'
+require 'poise_profiler/core_ext/dispatcher'
+require 'poise_profiler/core_ext/event_base'

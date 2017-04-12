@@ -36,7 +36,11 @@ module PoiseProfiler
     # Install this event handler in to Chef.
     #
     # @return [void]
-    def self.install
+    def self.install!
+      # Clear instance state to be safe.
+      instance.reset!
+      # For pre-Chef.run_context, use the monkey patch. Otherwise use the
+      # events API or global config.
       if Gem::Version.create(Chef::VERSION) <= Gem::Version.create('12.2.1')
         Chef::Log.debug("Registering poise-profiler handler #{self} using monkey patch")
         instance._monkey_patch_old_chef!
@@ -47,11 +51,11 @@ module PoiseProfiler
         # :nocov:
       else
         Chef::Log.debug("Registering poise-profiler handler #{self} using global config")
-        Chef::Config[:event_handlers] << instance
+        Chef::Config[:event_handlers] |= [instance]
       end
     end
 
-    # Used in {#_monkey_patch_old_chef}
+    # Used in {#_monkey_patch_old_chef}.
     #
     # @api private
     attr_writer :events, :monkey_patched
@@ -59,9 +63,9 @@ module PoiseProfiler
     # Hook to reset the handler for testing.
     #
     # @api private
-    # @abstract
     # @return [void]
     def reset!
+      @events = nil
     end
 
     # Inject this instance for Chef < 12.3. Don't call this on newer Chef.
@@ -70,18 +74,16 @@ module PoiseProfiler
     # @see Base.install
     # @return [void]
     def _monkey_patch_old_chef!
-      return if @_monkey_patched
       require 'chef/event_dispatch/dispatcher'
       instance = self
       orig_method = Chef::EventDispatch::Dispatcher.instance_method(:library_file_loaded)
       Chef::EventDispatch::Dispatcher.send(:define_method, :library_file_loaded) do |filename|
         instance.events = self
         instance.monkey_patched = false
-        @subscribers << instance
+        @subscribers |= [instance]
         Chef::EventDispatch::Dispatcher.send(:define_method, :library_file_loaded, orig_method)
         orig_method.bind(self).call(filename)
       end
-      @_monkey_patched = true
     end
 
     private
@@ -103,6 +105,16 @@ module PoiseProfiler
     # return [Chef::EventDispatch::Dispatcher]
     def events
       @events ||= Chef.run_context.events
+    end
+
+    # Accessor for the profiler config.
+    #
+    # @api private
+    # @return [PoiseProfiler::Config]
+    def config
+      # This could be a single global but it doesn't use enough RAM or CPU
+      # cycles that I care.
+      @config ||= PoiseProfiler::Config.new
     end
 
   end

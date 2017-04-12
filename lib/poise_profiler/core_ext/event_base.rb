@@ -14,8 +14,28 @@
 # limitations under the License.
 #
 
-require 'poise_profiler'
-require 'poise_profiler/core_ext'
+require 'chef/event_dispatch/base'
+require 'chef/version'
 
-# Install the handlers.
-PoiseProfiler::Timing.install!
+
+module PoiseProfiler
+  module CoreExt
+    # Monkeypatch extensions for Chef::EventDispatch::Base to support the
+    # new recipe_loaded event.
+    #
+    # @since 1.1.0
+    # @api private
+    module EventBase
+      def recipe_loaded(recipe_name)
+        # This space left intentionally blank.
+      end
+
+      # Monkeypatch us in for ?. TODO THIS
+      if Gem::Version.create(Chef::VERSION) < Gem::Version.create('13')
+        Chef::EventDispatch::Base.include(self)
+      end
+
+    end
+  end
+end
+

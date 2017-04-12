@@ -48,11 +48,8 @@ describe PoiseProfiler::Timing do
     # Divert log output for analysis.
     _output = output
     allow(events).to receive(:stream_output) {|tag, line| _output << line }
-    # Clear the handler's internal state.
-    described_class.instance.reset!
-    if Gem::Version.create(Chef::VERSION) <= Gem::Version.create('12.2.1')
-      described_class.instance._monkey_patch_old_chef!
-    end
+    # Re-set-up the handler. Also clears internal state to be safe.
+    described_class.install!
   end
   around do |ex|
     old_env = ENV.to_h
@@ -74,7 +71,7 @@ describe PoiseProfiler::Timing do
 
     it do
       is_expected.to match(
-%r{\APoise Profiler:
+%r{\APoise Profiler Timing:
 Time          Resource
 ------------  -------------
 \s*([\d.]+)  ruby_block\[test\]
@@ -105,7 +102,7 @@ Profiler JSON: \{.*?\}
 
     it do
       is_expected.to match(
-%r{\APoise Profiler:
+%r{\APoise Profiler Timing:
 Time          Resource
 ------------  -------------
 \s*([\d.]+)  ruby_block\[test\]
@@ -132,7 +129,7 @@ Profiler JSON: \{.*?\}
 
     it do
       is_expected.to match(
-%r{\APoise Profiler:
+%r{\APoise Profiler Timing:
 Time          Resource
 ------------  -------------
 \s*([\d.]+)  ruby_block\[test2\]
@@ -168,7 +165,7 @@ Profiler JSON: \{.*?\}
 
     it do
       is_expected.to match(
-%r{\APoise Profiler:
+%r{\APoise Profiler Timing:
 Time          Resource
 ------------  -------------
 \s*([\d.]+)  my_resource\[test\]
@@ -206,7 +203,7 @@ Profiler JSON: \{.*?\}
 
     it do
       is_expected.to match(
-%r{\APoise Profiler:
+%r{\APoise Profiler Timing:
 Time          Resource
 ------------  -------------
 \s*([\d.]+)  ruby_block\[test\]
@@ -237,7 +234,7 @@ Profiler JSON: \{.*?\}
 
     it do
       is_expected.to match(
-%r{\APoise Profiler:
+%r{\APoise Profiler Timing:
 Time          Resource
 ------------  -------------
 \s*([\d.]+)  ruby_block\[test\]
